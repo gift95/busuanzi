@@ -1,0 +1,70 @@
+[![soxft/busuanzi](https://socialify.cmds.run/soxft/busuanzi/image?description=1&font=Raleway&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fsoxft%2Fbusuanzi%2Fmain%2Fdist%2Ffavicon.png&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Dark&cache=43200)](https://busuanzi.9420.ltd)
+
+- [简体中文](readme/README.zh_CN.md)
+
+## self-hosted busuanzi
+
+> A simple visitor statistics system based on Golang + Redis
+
+- Calculate the UV and PV of the website
+- Calculate the UV and PV of the subpage
+- One-click deployment using Docker
+- Privacy protection only stores HASH
+- Pjax compatible webpage
+- Support migration from the original busuanzi
+
+## Installation
+
+Support multiple running methods: compile and run from source code, run with Docker. See [Install](https://github.com/soxft/busuanzi/wiki/install) for details
+1. 源码编译运行
+1.
+git clone https://github.com/soxft/busuanzi.git && cd busuanzi
+
+2.
+go build -o busuanzi main.go
+
+3.
+根据提示修改 config.yml
+
+4.
+编辑dist/busuanzi.js或编译dist/busuanzi.ts, 替换链接为自己部署的。
+
+5.
+通过命令 ./busuanzi 启动程序
+
+### Quick Start with Docker
+
+1. Edit the `docker-compose.yaml` file with your own configuration.
+2. Run `docker-compose up -d` to start the service. 
+3. Visit `http://localhost:8080` to view the data.
+
+## Usage
+
+Supports multiple custom attributes, compatible with pjax web pages, supports custom tag prefixes. See: [Usage documentation](https://github.com/soxft/busuanzi/wiki/usage)
+
+## Principle
+
+- `Busuanzi` uses Redis for data storage and retrieval. Redis, as an in-memory database, has extremely high read and write performance. At the same time, its unique RDB and AOF persistence mechanisms ensure the security of Redis data.
+
+UV and PV data are stored in the following keys:
+
+| index  | Types       | key                               |
+|--------|-------------|-----------------------------------|
+| sitePv | String      | bsz:site_pv:md5(host)             |
+| siteUv | HyperLogLog | bsz:site_uv:md5(host)             |
+| pagePv | ZSet        | bsz:page_pv:md5(host) / md5(path) |
+| pageUv | HyperLogLog | bsz:site_uv:md5(host):md5(path)   |
+
+## Data Migration
+
+- You can use the [busuanzi-sync](https://github.com/soxft/busuanzi-sync) tool to sync data from the [original busuanzi](http://busuanzi.ibruce.info) to the self-hosted busuanzi.
+
+## Other
+
+Logo created by ChatGPT
+
+## Upgrade Suggestions
+
+- Please be sure to back up your data (dump.rdb) before upgrading.
+- New and old version data may not be compatible, please pay attention to the instructions on the Release interface, upgrade cautiously
+- 2.5.x - 2.7.x can use the [bsz-transfer](https://github.com/soxft/busuanzi-transfer) tool to migrate data to 2.8.x.
