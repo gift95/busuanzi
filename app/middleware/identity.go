@@ -3,8 +3,9 @@ package middleware
 import (
 	"strings"
 
+	"busuanzi/library/jwtutil"
+
 	"github.com/gin-gonic/gin"
-	"github.com/soxft/busuanzi/library/jwtutil"
 )
 
 func Identity() gin.HandlerFunc {

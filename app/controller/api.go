@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/soxft/busuanzi/core"
+	"busuanzi/core"
 	"net/url"
+
+	"github.com/gin-gonic/gin"
 )
 
 var defaultData = gin.H{

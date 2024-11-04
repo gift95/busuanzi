@@ -1,18 +1,19 @@
 package webutil
 
 import (
+	"busuanzi/app/middleware"
+	"busuanzi/config"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/soxft/busuanzi/app/middleware"
-	"github.com/soxft/busuanzi/config"
-	"github.com/spf13/viper"
 	"log"
 	"net/url"
 	"os"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func Init() {
-	if viper.GetBool("web.debug") == false {
+	if !viper.GetBool("web.debug") {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

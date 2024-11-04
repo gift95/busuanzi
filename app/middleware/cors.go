@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"strings"
 
+	"busuanzi/config"
+
 	"github.com/gin-gonic/gin"
-	"github.com/soxft/busuanzi/config"
 	"github.com/spf13/viper"
 )
 

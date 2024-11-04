@@ -1,9 +1,10 @@
 package jwtutil
 
 import (
-	"github.com/soxft/busuanzi/library/tool"
-	"github.com/spf13/viper"
+	"busuanzi/library/tool"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 // Generate a token

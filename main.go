@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/soxft/busuanzi/config"
-	"github.com/soxft/busuanzi/process/redisutil"
-	"github.com/soxft/busuanzi/process/webutil"
+	"busuanzi/config"
+	"busuanzi/process/redisutil"
+	"busuanzi/process/webutil"
 )
 
 func main() {
