@@ -5,8 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/soxft/busuanzi/library/tool"
-	"github.com/soxft/busuanzi/process/redisutil"
+	"busuanzi/library/tool"
+	"busuanzi/process/redisutil"
+
 	"github.com/spf13/viper"
 )
 

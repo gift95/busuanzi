@@ -1,11 +1,12 @@
 package middleware
 
 import (
+	"busuanzi/library/jwtutil"
+	"busuanzi/library/tool"
 	"strings"
 
-	"busuanzi/library/jwtutil"
-
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func Identity() gin.HandlerFunc {
@@ -40,6 +41,9 @@ func setBszIdentity(c *gin.Context, userIdentity string) {
 }
 
 func getUserIdentity(c *gin.Context) string {
-	//return tool.Md5(c.ClientIP() + c.Request.UserAgent())
-	return c.ClientIP()
+	if viper.GetBool("web.showIP") {
+		return c.ClientIP()
+	} else {
+		return tool.Md5(c.ClientIP() + c.Request.UserAgent())
+	}
 }

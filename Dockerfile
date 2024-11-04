@@ -22,7 +22,7 @@ RUN set -evx -o pipefail        \
     && rm -rf pnpm-lock.yaml    \
     && rm -rf tsconfig.json
 
-FROM alpine:3.18
+FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/busuanzi /app
