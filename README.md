@@ -1,70 +1,35 @@
 [![soxft/busuanzi](https://socialify.cmds.run/soxft/busuanzi/image?description=1&font=Raleway&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fsoxft%2Fbusuanzi%2Fmain%2Fdist%2Ffavicon.png&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Dark&cache=43200)](https://busuanzi.9420.ltd)
 
-- [简体中文](readme/README.zh_CN.md)
+# 基于 soxft 改动 可选是否加密IP及路径
 
-## self-hosted busuanzi
+## 自建不蒜子
 
-> A simple visitor statistics system based on Golang + Redis
+> 一个基于 Golang + Redis 的简易访问量统计系统
 
-- Calculate the UV and PV of the website
-- Calculate the UV and PV of the subpage
-- One-click deployment using Docker
-- Privacy protection only stores HASH
-- Pjax compatible webpage
-- Support migration from the original busuanzi
+- 统计站点的 UV, PV
+- 统计子页面的 UV, PV
+- 使用 Docker 一键部署
+- 隐私保障 仅存储 HASH(可选)
+- 兼容 Pjax 技术的网页
+- 支持从原版不蒜子迁移数据
 
-## Installation
+## 安装
 
-Support multiple running methods: compile and run from source code, run with Docker. See [Install](https://github.com/soxft/busuanzi/wiki/install) for details
-1. 源码编译运行
-1.
-git clone https://github.com/soxft/busuanzi.git && cd busuanzi
+支持多种运行方式: 源码编译运行, Docker 运行. 详见: [Install](https://github.com/soxft/busuanzi/wiki/install)
 
-2.
-go build -o busuanzi main.go
+## 使用方式
 
-3.
-根据提示修改 config.yml
+支持多种自定义属性, 兼容 pjax 网页, 支持自定义 标签前缀. 详见: [使用文档](https://github.com/soxft/busuanzi/wiki/usage)
 
-4.
-编辑dist/busuanzi.js或编译dist/busuanzi.ts, 替换链接为自己部署的。
+## 原理
 
-5.
-通过命令 ./busuanzi 启动程序
+- `Busuanzi` 使用 Redis 进行数据存储与检索。Redis 作为内存数据库拥有极高的读写性能，同时其独特的`RDB`与`AOF`持久化方式，使得 Redis 的数据安全得到保障。
 
-### Quick Start with Docker
+- UV 与 PV 数据分别采用以下方式进行存储:
 
-1. Edit the `docker-compose.yaml` file with your own configuration.
-2. Run `docker-compose up -d` to start the service. 
-3. Visit `http://localhost:8080` to view the data.
-
-## Usage
-
-Supports multiple custom attributes, compatible with pjax web pages, supports custom tag prefixes. See: [Usage documentation](https://github.com/soxft/busuanzi/wiki/usage)
-
-## Principle
-
-- `Busuanzi` uses Redis for data storage and retrieval. Redis, as an in-memory database, has extremely high read and write performance. At the same time, its unique RDB and AOF persistence mechanisms ensure the security of Redis data.
-
-UV and PV data are stored in the following keys:
-
-| index  | Types       | key                               |
+| index  | 数据类型        | key                               |
 |--------|-------------|-----------------------------------|
-| sitePv | String      | bsz:site_pv:md5(host)             |
-| siteUv | HyperLogLog | bsz:site_uv:md5(host)             |
-| pagePv | ZSet        | bsz:page_pv:md5(host) / md5(path) |
-| pageUv | HyperLogLog | bsz:site_uv:md5(host):md5(path)   |
-
-## Data Migration
-
-- You can use the [busuanzi-sync](https://github.com/soxft/busuanzi-sync) tool to sync data from the [original busuanzi](http://busuanzi.ibruce.info) to the self-hosted busuanzi.
-
-## Other
-
-Logo created by ChatGPT
-
-## Upgrade Suggestions
-
-- Please be sure to back up your data (dump.rdb) before upgrading.
-- New and old version data may not be compatible, please pay attention to the instructions on the Release interface, upgrade cautiously
-- 2.5.x - 2.7.x can use the [bsz-transfer](https://github.com/soxft/busuanzi-transfer) tool to migrate data to 2.8.x.
+| sitePv | String      | bsz:site_pv:md5(host)/ host          |
+| siteUv | HyperLogLog | bsz:site_uv:md5(host)  host        |
+| pagePv | ZSet        | bsz:page_pv:md5(host) / md5(path) / (host/path) |
+| pageUv | HyperLogLog | bsz:site_uv:md5(host):md5(path)  / (host:path) |
