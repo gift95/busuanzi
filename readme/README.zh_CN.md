@@ -12,6 +12,7 @@
 - 支持从原版不蒜子迁移数据
 
 ## 安装
+docker build -t gift95/busuanzi:latest .
 
 支持多种运行方式: 源码编译运行, Docker 运行. 详见: [Install](https://github.com/soxft/busuanzi/wiki/install)
 
