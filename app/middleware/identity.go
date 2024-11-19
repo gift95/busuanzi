@@ -41,9 +41,10 @@ func setBszIdentity(c *gin.Context, userIdentity string) {
 }
 
 func getUserIdentity(c *gin.Context) string {
-	if viper.GetBool("web.showIP") {
-		return c.ClientIP()
-	} else {
+	Encrypt := viper.GetString("Bsz.Encrypt")
+	if Encrypt == "MD516" || Encrypt == "MD532" {
 		return tool.Md5(c.ClientIP() + c.Request.UserAgent())
+	} else {
+		return c.ClientIP()
 	}
 }
