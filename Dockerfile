@@ -1,8 +1,9 @@
 FROM golang:1.22-alpine AS builder
 WORKDIR /app
 
-ENV GOPROXY=https://goproxy.cn,direct
-ENV GO111MODULE=on
+#国内构建请打开注释
+#ENV GOPROXY=https://goproxy.cn,direct
+#ENV GO111MODULE=on
 
 COPY . .
 RUN set -evx -o pipefail        \
