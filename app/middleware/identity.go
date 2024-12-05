@@ -3,7 +3,6 @@ package middleware
 import (
 	"busuanzi/library/jwtutil"
 	"busuanzi/library/tool"
-	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -42,13 +41,18 @@ func setBszIdentity(c *gin.Context, userIdentity string) {
 }
 
 func getUserIdentity(c *gin.Context) string {
-	Encrypt := viper.GetString("Bsz.Encrypt")
-	log.Println(`Encrypt:` + Encrypt)
-	if Encrypt == "MD516" || Encrypt == "MD532" {
-		log.Println(`Md5:` + tool.Md5(c.ClientIP()+c.Request.UserAgent()))
-		return tool.Md5(c.ClientIP() + c.Request.UserAgent())
-	} else {
-		log.Println(`ClientIP:` + c.ClientIP())
-		return c.ClientIP()
+	// 获取客户端 IP 和 User-Agent
+	clientIP := c.ClientIP()
+	userAgent := c.Request.UserAgent()
+	// 判断加密方式是否是 MD516 或 MD532
+	if isEncryptMD5(viper.GetString("Bsz.Encrypt")) {
+		return tool.Md5(clientIP + userAgent)
 	}
+
+	return clientIP
+}
+
+// 判断是否是 MD5 加密方式
+func isEncryptMD5(encryptType string) bool {
+	return encryptType == "MD516" || encryptType == "MD532"
 }
