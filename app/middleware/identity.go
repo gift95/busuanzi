@@ -45,8 +45,10 @@ func getUserIdentity(c *gin.Context) string {
 	Encrypt := viper.GetString("Bsz.Encrypt")
 	log.Println(`Encrypt:` + Encrypt)
 	if Encrypt == "MD516" || Encrypt == "MD532" {
+		log.Println(`Md5:` + tool.Md5(c.ClientIP()+c.Request.UserAgent()))
 		return tool.Md5(c.ClientIP() + c.Request.UserAgent())
 	} else {
+		log.Println(`ClientIP:` + c.ClientIP())
 		return c.ClientIP()
 	}
 }
