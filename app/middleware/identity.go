@@ -3,6 +3,7 @@ package middleware
 import (
 	"busuanzi/library/jwtutil"
 	"busuanzi/library/tool"
+	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +43,7 @@ func setBszIdentity(c *gin.Context, userIdentity string) {
 
 func getUserIdentity(c *gin.Context) string {
 	Encrypt := viper.GetString("Bsz.Encrypt")
-	println(`Encrypt:` + Encrypt)
+	log.Println(`Encrypt:` + Encrypt)
 	if Encrypt == "MD516" || Encrypt == "MD532" {
 		return tool.Md5(c.ClientIP() + c.Request.UserAgent())
 	} else {
