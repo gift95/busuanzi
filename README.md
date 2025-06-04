@@ -16,6 +16,7 @@
 ## 安装
 
 支持多种运行方式: 源码编译运行, Docker 运行. 详见: [Install](https://github.com/soxft/busuanzi/wiki/install)
+docker pull gift95/busuanzi:latest
 
 ## 使用方式
 
