@@ -1,6 +1,4 @@
-[![soxft/busuanzi](https://socialify.cmds.run/soxft/busuanzi/image?description=1&font=Raleway&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fsoxft%2Fbusuanzi%2Fmain%2Fdist%2Ffavicon.png&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Dark&cache=43200)](https://busuanzi.9420.ltd)
-
-# 基于 soxft 改动 可选是否加密IP及路径
+# 基于 [soxft](https://github.com/soxft/busuanzi)  可选是否加密IP及路径
 
 ## 自建不蒜子
 
@@ -55,8 +53,6 @@ services:
 
 
 ## 使用方式
-
-支持多种自定义属性, 兼容 pjax 网页, 支持自定义 标签前缀. 
 
 详见: https://bsz.hnlyx.top
 
