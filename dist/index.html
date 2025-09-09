@@ -43,7 +43,17 @@
             background-repeat: no-repeat !important;
             background-size: cover !important;
             background-attachment: fixed !important;
-            background-position-x: center !important;
+            background-position: center !important;
+            /* 确保背景颜色有默认值，避免变量未定义时背景空白 */
+            background-color: #f0f0f0;
+            /* 确保body元素至少占据整个视口高度 */
+            min-height: 100vh;
+            /* 确保CSS变量已定义，添加默认值 */
+            --my-color: rgba(255, 255, 255, 0.7);
+            /* 移除可能影响背景显示的默认外边距 */
+            margin: 0;
+            /* 移除可能影响背景显示的默认内边距 */
+            padding: 0;
         }
 
         .hope-c-PJLV-igScBhH-css,
