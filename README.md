@@ -53,6 +53,7 @@ services:
 ## 使用方式
 
 详见: https://bsz.yxliu.cc
+详见: https://bsz.yxliu.cc
 
 ## 原理
 
