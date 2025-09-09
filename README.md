@@ -1,4 +1,4 @@
-# 基于 [soxft](https://github.com/soxft/busuanzi)  可选是否加密IP及路径
+# 基于 [soxft](https://github.com/soxft/busuanzi) 可选是否加密 IP 及路径
 
 ## 自建不蒜子
 
@@ -14,7 +14,7 @@
 
 支持多种运行方式: 源码编译运行, Docker 运行. 详见: [Install](https://github.com/soxft/busuanzi/wiki/install)
 
-或使用docker compose 部署
+或使用 docker compose 部署
 
 ```yaml
 version: "3.8"
@@ -24,37 +24,35 @@ services:
     image: "gift95/busuanzi:latest"
     container_name: busuanzi
     ports:
-    # 修改映射到宿主机的端口 host:container
-      - "4080:8080"                            
+      # 修改映射到宿主机的端口 host:container
+      - "4080:8080"
     volumes:
-       - /opt/bsz/bsz:/app/expose
+      - /opt/bsz/bsz:/app/expose
     environment:
-    # 是否开启日志
-      WEB_LOG: true                          
-   # 是否开启debug模式
-      WEB_DEBUG: false                       
- 	# 跨域访问
-      WEB_CORS: "*"                            
-	 # 统计数据过期时间 单位秒, 请输入整数 (无任何访问, 超过这个时间后, 统计数据将被清空, 0为不过期)
-      BSZ_EXPIRE: 0                            
- 	# 签名密钥 // 请设置为任意长度的随机值
-      BSZ_SECRET: "BSZ"                 
-	# 填写你的 API 地址 需要转译 (即 用 `\/` 替代 `/`)
-      API_SERVER: https:\/\/bsz.hnlyx.top\/api  
-		# redis 地址
-      REDIS_ADDRESS: redis:6379     
+      # 是否开启日志
+      WEB_LOG: true
+      # 是否开启debug模式
+      WEB_DEBUG: false
+      # 跨域访问
+      WEB_CORS: "*"
+      # 统计数据过期时间 单位秒, 请输入整数 (无任何访问, 超过这个时间后, 统计数据将被清空, 0为不过期)
+      BSZ_EXPIRE: 0
+      # 签名密钥 // 请设置为任意长度的随机值
+      BSZ_SECRET: "BSZ"
+      # 填写你的 API 地址 需要转译 (即 用 `\/` 替代 `/`)
+      API_SERVER: https:\/\/bsz.yxliu.cc
+      # redis 地址
+      REDIS_ADDRESS: redis:6379
       REDIS_PASSWORD: redis
       # 路径样式 (false: url&path, true: path) 老版本请使用 false,  true 更便于数据迁移
       BSZ_PATHSTYLE: true
-      # 加密算法 (MD516 / MD532/空) 
-      BSZ_ENCRYPT: 
+      # 加密算法 (MD516 / MD532/空)
+      BSZ_ENCRYPT:
 ```
-
-
 
 ## 使用方式
 
-详见: https://bsz.hnlyx.top
+详见: https://bsz.yxliu.cc
 
 ## 原理
 
@@ -62,9 +60,9 @@ services:
 
 - UV 与 PV 数据分别采用以下方式进行存储:
 
-| index  | 数据类型        | key                               |
-|--------|-------------|-----------------------------------|
-| sitePv | String      | bsz:site_pv:md5(host)/ host          |
-| siteUv | HyperLogLog | bsz:site_uv:md5(host)  host        |
+| index  | 数据类型    | key                                             |
+| ------ | ----------- | ----------------------------------------------- |
+| sitePv | String      | bsz:site_pv:md5(host)/ host                     |
+| siteUv | HyperLogLog | bsz:site_uv:md5(host) host                      |
 | pagePv | ZSet        | bsz:page_pv:md5(host) / md5(path) / (host/path) |
-| pageUv | HyperLogLog | bsz:site_uv:md5(host):md5(path)  / (host:path) |
+| pageUv | HyperLogLog | bsz:site_uv:md5(host):md5(path) / (host:path)   |
