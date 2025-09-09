@@ -40,7 +40,7 @@ services:
  	# 签名密钥 // 请设置为任意长度的随机值
       BSZ_SECRET: "BSZ"                 
 	# 填写你的 API 地址 需要转译 (即 用 `\/` 替代 `/`)
-      API_SERVER: https:\/\/bsz.hnlyx.top\/api  
+      API_SERVER: https:\/\/bsz.yxliu.cc  
 		# redis 地址
       REDIS_ADDRESS: redis:6379     
       REDIS_PASSWORD: redis
@@ -54,7 +54,7 @@ services:
 
 ## 使用方式
 
-详见: https://bsz.hnlyx.top
+详见: https://bsz.yxliu.cc
 
 ## 原理
 
