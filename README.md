@@ -66,3 +66,23 @@ services:
 | siteUv | HyperLogLog | bsz:site_uv:md5(host) host                      |
 | pagePv | ZSet        | bsz:page_pv:md5(host) / md5(path) / (host/path) |
 | pageUv | HyperLogLog | bsz:site_uv:md5(host):md5(path) / (host:path)   |
+
+
+<picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="
+      https://api.star-history.com/svg?repos=gift95/busuanzi&type=Date&theme=dark
+    "
+  />
+  <source
+    media="(prefers-color-scheme: light)"
+    srcset="
+      https://api.star-history.com/svg?repos=gift95/busuanzi&type=Date
+    "
+  />
+  <img
+    alt="Star History Chart"
+    src="https://api.star-history.com/svg?repos=gift95/busuanzi&type=Date"
+  />
+</picture>
