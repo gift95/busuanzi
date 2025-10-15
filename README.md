@@ -72,13 +72,13 @@ services:
   <source
     media="(prefers-color-scheme: dark)"
     srcset="
-      https://api.star-history.com/svg?repos=gift95/busuanzi&type=Date&theme=dark
+      https://api.star-history.com/svg?repos=star-history/star-history&type=Date&theme=dark
     "
   />
   <source
     media="(prefers-color-scheme: light)"
     srcset="
-      https://api.star-history.com/svg?repos=gift95/busuanzi&type=Date
+      https://api.star-history.com/svg?repos=star-history/star-history&type=Date
     "
   />
   <img
