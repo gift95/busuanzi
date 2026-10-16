@@ -53,6 +53,10 @@ services:
       WEB_DEBUG: false
       # 跨域访问：* 或逗号分隔的域名白名单
       WEB_CORS: "*"
+      # 每 IP 每秒请求数（令牌桶限流），0 关闭
+      WEB_RATELIMIT: 10
+      # 令牌桶容量（突发上限）
+      WEB_RATELIMITBURST: 20
       # 统计数据过期时间（秒），超过该时间无访问将被清空，0 为永不过期
       BSZ_EXPIRE: 0
       # 必填：签名密钥，请使用 ≥16 位随机值，可用 openssl rand -hex 16 生成
@@ -66,6 +70,8 @@ services:
       BSZ_PATHSTYLE: true
       # 加密算法：MD516 / MD532 / 空
       BSZ_ENCRYPT:
+      # 允许统计的域名白名单（逗号分隔），空则不限制
+      BSZ_ALLOWHOSTS: ""
 ```
 
 > ⚠️ 服务启动时会校验 `BSZ_SECRET`：等于默认值或长度不足 16 位将**拒绝启动**。
