@@ -1,9 +1,11 @@
 package middleware
 
 import (
+	"log"
+	"strings"
+
 	"busuanzi/library/jwtutil"
 	"busuanzi/library/tool"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -26,6 +28,7 @@ func Identity() gin.HandlerFunc {
 			// check if token is illegal
 			if userIdentity = jwtutil.Check(token); userIdentity == "" {
 				// fake data, regenerate jwt token
+				log.Printf("[WARN] invalid identity token from %s, re-issue", c.ClientIP())
 				userIdentity = getUserIdentity(c)
 				setBszIdentity(c, userIdentity)
 			}

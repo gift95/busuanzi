@@ -1,8 +1,10 @@
 package controller
 
 import (
-	"busuanzi/core"
+	"context"
 	"net/url"
+
+	"busuanzi/core"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,26 +14,22 @@ var defaultData = gin.H{
 	"usage":   "https://github.com/soxft/busuanzi/wiki/usage",
 }
 
-func ApiHandler(c *gin.Context) {
-	var referer = c.Request.Header.Get("x-bsz-referer")
+// parseReferer 校验并解析 x-bsz-referer，返回 host 与 path
+func parseReferer(c *gin.Context) (host, path string, ok bool) {
+	referer := c.Request.Header.Get("x-bsz-referer")
 	if referer == "" {
-		c.JSON(200, gin.H{
-			"success": false,
-			"message": "invalid referer",
-			"data":    defaultData,
-		})
-		return
+		return "", "", false
 	}
-
 	u, err := url.Parse(referer)
-	if err != nil {
-		c.JSON(200, gin.H{
-			"success": false,
-			"message": "unable to parse referer",
-			"data":    defaultData,
-		})
-		return
-	} else if u.Host == "" {
+	if err != nil || u.Host == "" {
+		return "", "", false
+	}
+	return u.Host, u.Path, true
+}
+
+func ApiHandler(c *gin.Context) {
+	host, path, ok := parseReferer(c)
+	if !ok {
 		c.JSON(200, gin.H{
 			"success": false,
 			"message": "invalid referer",
@@ -39,9 +37,6 @@ func ApiHandler(c *gin.Context) {
 		})
 		return
 	}
-
-	var host = u.Host
-	var path = u.Path
 
 	// count
 	counts := core.Count(c, host, path, c.GetString("user_identity"))
@@ -61,35 +56,21 @@ func ApiHandler(c *gin.Context) {
 
 // PutHandler 仅提交数据, 不做返回
 func PutHandler(c *gin.Context) {
-	var referer = c.Request.Header.Get("x-bsz-referer")
-	if referer == "" {
+	host, path, ok := parseReferer(c)
+	if !ok {
 		c.Status(400)
 		return
 	}
 
-	u, err := url.Parse(referer)
-	if err != nil {
-		c.Status(400)
-		return
-	} else if u.Host == "" {
-		c.Status(400)
-		return
-	}
-
-	var host = u.Host
-	var path = u.Path
-
-	// count
-	go core.Put(c, host, path, c.GetString("user_identity"))
-
-	// json
+	// 使用独立 context，避免复用已结束的请求上下文
+	go core.Put(context.Background(), host, path, c.GetString("user_identity"))
 	c.Status(204)
 }
 
 // GetHandler 仅获取数据, 不增加
 func GetHandler(c *gin.Context) {
-	var referer = c.Request.Header.Get("x-bsz-referer")
-	if referer == "" {
+	host, path, ok := parseReferer(c)
+	if !ok {
 		c.JSON(200, gin.H{
 			"success": false,
 			"message": "invalid referer",
@@ -97,26 +78,6 @@ func GetHandler(c *gin.Context) {
 		})
 		return
 	}
-
-	u, err := url.Parse(referer)
-	if err != nil {
-		c.JSON(200, gin.H{
-			"success": false,
-			"message": "unable to parse referer",
-			"data":    defaultData,
-		})
-		return
-	} else if u.Host == "" {
-		c.JSON(200, gin.H{
-			"success": false,
-			"message": "invalid referer",
-			"data":    defaultData,
-		})
-		return
-	}
-
-	var host = u.Host
-	var path = u.Path
 
 	// count
 	counts := core.Get(c, host, path)

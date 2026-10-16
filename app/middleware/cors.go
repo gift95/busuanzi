@@ -13,28 +13,22 @@ import (
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cors := viper.GetString("Web.Cors")
+		origin := c.Request.Header.Get("Origin")
 
-		// 多 cors 匹配 Failed to load resource: Access-Control-Allow-Origin cannot contain more than one origin.
-		var corsPass = false
-		var origin = c.Request.Header.Get("Origin")
-
-		if strings.Contains(cors, ",") {
-			// 多 Cors 匹配, 判断请求多域名是否在 cors 列表中
+		// 仅白名单匹配时才回显 Origin，避免任意站点跨域读取计数
+		var allow string
+		if cors == "*" {
+			allow = origin
+		} else {
 			for _, v := range strings.Split(cors, ",") {
-				allow := strings.ToLower(strings.TrimSpace(v))
-
-				if origin == allow {
-					corsPass = true
-					c.Header("Access-Control-Allow-Origin", allow)
+				if strings.EqualFold(strings.TrimSpace(v), origin) {
+					allow = origin
 					break
 				}
 			}
-		} else {
-			// 单 cors 匹配  // * 或者单域名
-			if cors == "*" || origin == cors {
-				corsPass = true
-			}
-			c.Header("Access-Control-Allow-Origin", origin)
+		}
+		if allow != "" {
+			c.Header("Access-Control-Allow-Origin", allow)
 		}
 
 		c.Header("Server", "busuanzi-by-xcsoft/"+config.VERSION)
@@ -42,7 +36,7 @@ func Cors() gin.HandlerFunc {
 			c.Header("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS")
 			c.Header("Access-Control-Allow-Headers", "*")
 			c.Header("Access-Control-Max-Age", "86400")
-			if corsPass {
+			if allow != "" {
 				c.AbortWithStatus(204)
 			} else {
 				c.AbortWithStatus(403)

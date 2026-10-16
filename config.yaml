@@ -15,7 +15,7 @@ Redis:
   MaxRetries: 3   # 最大重试次数
 Bsz:
   Expire: 0        # 统计数据过期时间 单位秒, 请输入整数 (无任何访问, 超过这个时间后, 统计数据将被清空, 0为不过期)
-  Secret: "bsz"    # JWT签名密钥 // 请设置为任意长度的随机值
+  Secret: "bsz"    # 必须替换为 ≥16 位随机值，否则服务拒绝启动（可用环境变量 BSZ_SECRET 覆盖）
   Encrypt: "" # 加密算法 (MD516 / MD532/空) 
   PathStyle: true  # 路径样式 (false: url&path, true: path) 老版本请使用 false,  true 更便于数据迁移
 
