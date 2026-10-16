@@ -18,7 +18,8 @@ Redis:
 Bsz:
   Expire: 0        # 统计数据过期时间 单位秒, 请输入整数 (无任何访问, 超过这个时间后, 统计数据将被清空, 0为不过期)
   Secret: "bsz"    # 必须替换为 ≥16 位随机值，否则服务拒绝启动（可用环境变量 BSZ_SECRET 覆盖）
-  Encrypt: "" # 加密算法 (MD516 / MD532/空) 
+  Encrypt: "" # 加密算法 (MD516 / MD532/空)
+  Privacy: true  # 隐私模式（默认开启，同上游）：host/path 一律 MD5 混淆、身份取 MD5(IP+UA)；设为 false 则使用明文 host/path + 明文 IP
   PathStyle: true  # 路径样式 (false: url&path, true: path) 老版本请使用 false,  true 更便于数据迁移
   AllowHosts: ""   # 允许统计的域名白名单（逗号分隔，如 a.com,b.com），空则不限制
 

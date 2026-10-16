@@ -34,7 +34,7 @@ func Cors() gin.HandlerFunc {
 		c.Header("Server", "busuanzi-by-xcsoft/"+config.VERSION)
 		if c.Request.Method == http.MethodOptions {
 			c.Header("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS")
-			c.Header("Access-Control-Allow-Headers", "*")
+			c.Header("Access-Control-Allow-Headers", "x-bsz-referer, Authorization")
 			c.Header("Access-Control-Max-Age", "86400")
 			if allow != "" {
 				c.AbortWithStatus(204)

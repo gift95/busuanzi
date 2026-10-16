@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
 	"strings"
 
+	"busuanzi/app/middleware"
 	"busuanzi/core"
 
 	"github.com/gin-gonic/gin"
@@ -108,4 +110,53 @@ func GetHandler(c *gin.Context) {
 			"page_uv": counts.PageUv,
 		},
 	})
+}
+
+// JsonpHandler JSONP 计数端点：通过 <script> 标签天然跨域取数，兼容不支持 CORS 的环境。
+// 无需 Authorization 头，身份与隐私模式联动（默认 MD5(IP+UA)，关闭隐私后为明文 IP）。
+func JsonpHandler(c *gin.Context) {
+	c.Header("Content-Type", "application/javascript")
+
+	callback := c.Query("callback")
+	if callback == "" {
+		c.String(200, "try{console.error('%s')}catch{}", "missing callback parameter")
+		return
+	}
+
+	referer := c.GetHeader("Referer")
+	u, err := url.Parse(referer)
+	if err != nil || u.Host == "" {
+		c.String(200, "try{console.error('%s')}catch{}", "invalid referer")
+		return
+	}
+
+	// AllowHosts 白名单校验（与 /api 一致）
+	if hosts := viper.GetString("bsz.allowHosts"); hosts != "" {
+		allowed := false
+		for _, h := range strings.Split(hosts, ",") {
+			if strings.EqualFold(strings.TrimSpace(h), u.Host) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			c.String(200, "try{console.error('%s')}catch{}", "referer not allowed")
+			return
+		}
+	}
+
+	counts := core.Count(c, u.Host, u.Path, middleware.IdentityOf(c))
+
+	data := gin.H{
+		"site_pv": counts.SitePv,
+		"site_uv": counts.SiteUv,
+		"page_pv": counts.PagePv,
+		"page_uv": counts.PageUv,
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		c.String(200, "try{console.error('%s')}catch{}", "gen json failed")
+		return
+	}
+	c.String(200, "try{%s(%s);}catch(e){}", callback, string(jsonData))
 }

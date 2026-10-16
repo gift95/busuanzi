@@ -144,14 +144,17 @@ func getKeys(host string, path string) RKeys {
 		pathUnique = host + "&" + path
 	}
 
-	// encrypt
-	switch viper.GetString("bsz.Encrypt") {
-	case "MD516":
-		siteUnique = tool.Md5(siteUnique)[8:24]
-		pathUnique = tool.Md5(pathUnique)[8:24]
-	case "MD532":
-		siteUnique = tool.Md5(siteUnique)
-		pathUnique = tool.Md5(pathUnique)
+	// 隐私模式（默认开启，与上游一致）：host/path 一律 MD5 混淆
+	// 关闭隐私模式（BSZ_PRIVACY=false）后使用明文 host/path
+	if viper.GetBool("bsz.privacy") {
+		switch viper.GetString("bsz.Encrypt") {
+		case "MD516":
+			siteUnique = tool.Md5(siteUnique)[8:24]
+			pathUnique = tool.Md5(pathUnique)[8:24]
+		default: // MD532 或未配置：完整 MD5 混淆（同上游）
+			siteUnique = tool.Md5(siteUnique)
+			pathUnique = tool.Md5(pathUnique)
+		}
 	}
 
 	redisPrefix := viper.GetString("redis.prefix")

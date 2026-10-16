@@ -21,6 +21,7 @@ func setup(t *testing.T) *miniredis.Miniredis {
 	viper.Set("bsz.expire", 0)
 	viper.Set("bsz.pathStyle", true)
 	viper.Set("bsz.encrypt", "")
+	viper.Set("bsz.privacy", false) // 测试默认走明文 key 分支
 	return mr
 }
 
@@ -86,20 +87,33 @@ func TestGetKeys(t *testing.T) {
 	}
 	viper.Set("bsz.pathStyle", true)
 
-	// MD532：host/path 全量 md5
+	// 隐私模式（默认开启，同上游）：host/path 一律 MD5 混淆
+	viper.Set("bsz.privacy", true)
+
+	// encrypt 为空时也做完整 MD5（同上游 default 分支）
+	viper.Set("bsz.encrypt", "")
+	rk = getKeys("example.com", "/a")
+	if rk.SitePvKey != "bsz:site_pv:"+tool.Md5("example.com") {
+		t.Fatalf("privacy default md5 site pv key unexpected: %s", rk.SitePvKey)
+	}
+	if rk.PathUnique != tool.Md5("/a") {
+		t.Fatalf("privacy default md5 path unique unexpected: %s", rk.PathUnique)
+	}
+
+	// MD532：完整 MD5
 	viper.Set("bsz.encrypt", "MD532")
 	rk = getKeys("example.com", "/a")
 	if rk.SitePvKey != "bsz:site_pv:"+tool.Md5("example.com") {
-		t.Fatalf("md532 site pv key unexpected: %s", rk.SitePvKey)
-	}
-	if rk.PathUnique != tool.Md5("/a") {
-		t.Fatalf("md532 path unique unexpected: %s", rk.PathUnique)
+		t.Fatalf("privacy md532 site pv key unexpected: %s", rk.SitePvKey)
 	}
 
-	// MD516：取 md5 中段 16 位
+	// MD516：中段 16 位
 	viper.Set("bsz.encrypt", "MD516")
 	rk = getKeys("example.com", "/a")
 	if rk.SiteUnique != tool.Md5("example.com")[8:24] {
-		t.Fatalf("md516 site unique unexpected: %s", rk.SiteUnique)
+		t.Fatalf("privacy md516 site unique unexpected: %s", rk.SiteUnique)
 	}
+
+	viper.Set("bsz.privacy", false) // 复位，避免影响其他测试
+	viper.Set("bsz.encrypt", "")
 }

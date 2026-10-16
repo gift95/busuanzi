@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"busuanzi/library/jwtutil"
+	"busuanzi/library/tool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -66,7 +67,7 @@ func TestCorsWildcard(t *testing.T) {
 func TestIdentity(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	viper.Set("bsz.secret", "test-secret-123456")
-	viper.Set("bsz.encrypt", "")
+	viper.Set("bsz.privacy", true) // 隐私模式（默认开启）：身份为 MD5(IP+UA)
 
 	r := gin.New()
 	r.Use(Identity())
@@ -79,12 +80,24 @@ func TestIdentity(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/api", nil)
 	req.RemoteAddr = "1.2.3.4:1234"
 	r.ServeHTTP(w, req)
-	if body := w.Body.String(); body == "" {
-		t.Fatal("expected a user identity")
+	want := tool.Md5("1.2.3.4")
+	if body := w.Body.String(); body != want {
+		t.Fatalf("privacy identity should be md5(ip+ua), got %q want %q", body, want)
 	}
 	if w.Header().Get("Set-Bsz-Identity") == "" {
 		t.Fatal("expected Set-Bsz-Identity header")
 	}
+
+	// 关闭隐私模式：身份为明文 IP
+	viper.Set("bsz.privacy", false)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/api", nil)
+	req.RemoteAddr = "5.6.7.8:1234"
+	r.ServeHTTP(w, req)
+	if body := w.Body.String(); body != "5.6.7.8" {
+		t.Fatalf("non-privacy identity should be raw ip, got %q", body)
+	}
+	viper.Set("bsz.privacy", true)
 
 	// 携带合法 token：复用身份
 	token := jwtutil.Generate("user-x")

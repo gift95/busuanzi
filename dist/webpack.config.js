@@ -1,14 +1,18 @@
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = {
-    entry:'./busuanzi.ts',
-    output:{
-        filename:'busuanzi.js',
-        path: path.resolve(__dirname,'./')
+    entry: {
+        'busuanzi': './busuanzi.ts',
+        'busuanzi.jsonp': './busuanzi.jsonp.ts',
+        'busuanzi.lite': './busuanzi.lite.ts',
+        'busuanzi.pjax.lite': './busuanzi.pjax.lite.ts',
+    },
+    output: {
+        filename: '[name].js',
+        path: path.resolve(__dirname, './')
     },
     mode: 'production',
-    module:{
+    module: {
         rules: [{
             test: /\.tsx?$/,
             use: 'ts-loader',

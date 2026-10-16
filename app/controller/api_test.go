@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"busuanzi/process/redisutil"
@@ -112,4 +113,53 @@ func TestPingRedisDown(t *testing.T) {
 	if w.Code != 503 {
 		t.Fatalf("ping should return 503 with redis down, got %d", w.Code)
 	}
+}
+
+func TestJsonpHandler(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	mr := miniredis.RunT(t)
+	defer mr.Close()
+	redisutil.RDB = redis.NewClient(&redis.Options{Addr: mr.Addr()})
+
+	viper.Set("bsz.allowHosts", "")
+	viper.Set("bsz.privacy", true)
+
+	r := gin.New()
+	r.GET("/jsonp", JsonpHandler)
+
+	// 缺少 callback 参数
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/jsonp", nil)
+	r.ServeHTTP(w, req)
+	if got := w.Body.String(); got != "try{console.error('missing callback parameter')}catch{}" {
+		t.Fatalf("missing callback unexpected: %s", got)
+	}
+	if ct := w.Header().Get("Content-Type"); ct != "application/javascript" {
+		t.Fatalf("content type unexpected: %s", ct)
+	}
+
+	// 正常调用：回调包裹 JSON 数据
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/jsonp?callback=BszCallback_123", nil)
+	req.Header.Set("Referer", "https://a.example.com/page")
+	req.RemoteAddr = "1.2.3.4:1234"
+	r.ServeHTTP(w, req)
+	body := w.Body.String()
+	if !strings.Contains(body, "try{BszCallback_123(") {
+		t.Fatalf("expected callback invocation, got %s", body)
+	}
+	if !strings.Contains(body, "site_pv") {
+		t.Fatalf("expected site_pv data, got %s", body)
+	}
+
+	// 白名单外 referer 被拒绝
+	viper.Set("bsz.allowHosts", "a.example.com")
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/jsonp?callback=C", nil)
+	req.Header.Set("Referer", "https://evil.example.com/page")
+	r.ServeHTTP(w, req)
+	if got := w.Body.String(); got != "try{console.error('referer not allowed')}catch{}" {
+		t.Fatalf("whitelist rejection unexpected: %s", got)
+	}
+	viper.Set("bsz.allowHosts", "")
 }

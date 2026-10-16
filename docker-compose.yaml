@@ -29,4 +29,5 @@ services:
       REDIS_PASSWORD: 
       BSZ_PATHSTYLE: true                       # 路径样式 (false: url&path, true: path) 老版本请使用 false, true 更便于数据迁移
       BSZ_ENCRYPT:                              # 加密算法 (MD516 / MD532/空)
+      BSZ_PRIVACY: "true"                       # 隐私模式（默认开启，同上游）：host/path 一律 MD5 混淆、身份取 MD5(IP+UA)；false 则明文 host/path + 明文 IP
       BSZ_ALLOWHOSTS: ""                        # 允许统计的域名白名单（逗号分隔，如 a.com,b.com），空则不限制

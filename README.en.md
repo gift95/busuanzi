@@ -12,7 +12,7 @@
 
 </div>
 
-A fork of [soxft/busuanzi](https://github.com/soxft/busuanzi) with optional **IP and path encryption**, built to self-host your own busuanzi-style counter.
+A fork of [soxft/busuanzi](https://github.com/soxft/busuanzi) with **privacy mode enabled by default** (MD5-masked host/path, identity = MD5(IP+UA)), toggleable via one switch, built to self-host your own busuanzi-style counter.
 
 ## ✨ Features
 
@@ -21,6 +21,9 @@ A fork of [soxft/busuanzi](https://github.com/soxft/busuanzi) with optional **IP
 - One-click Docker deployment
 - Pjax-compatible (automatic counting on SPA pushState / popstate navigation)
 - Data migration from the original busuanzi service
+- **Privacy mode on by default**: host/path always MD5-masked, identity = MD5(IP+UA); set `BSZ_PRIVACY=false` for plaintext
+- **JSONP counting endpoint** (`/jsonp`): cross-origin via `<script>` tags, works where CORS is unavailable
+- **Multiple front-end variants**: full / JSONP / Lite / Lite+Pjax (`/js`, `/js/jsonp`, `/js/lite`, `/js/lite_pjax`)
 - HMAC-SHA256 signed identity tokens with automatic expiry rotation
 - Count requests merged into a single Redis pipeline (one network round-trip)
 - Built-in unit tests (miniredis), verified via `go test`
@@ -70,8 +73,10 @@ services:
       REDIS_PASSWORD:
       # Path style (true: path; false: url&path, use false when migrating legacy data)
       BSZ_PATHSTYLE: true
-      # Encryption algorithm: MD516 / MD532 / empty
+      # Encryption algorithm: MD516 / MD532 / empty (privacy mode: empty = full MD5)
       BSZ_ENCRYPT:
+      # Privacy mode (default on, same as upstream): host/path always MD5-masked, identity = MD5(IP+UA); false = plaintext host/path + raw IP
+      BSZ_PRIVACY: "true"
       # Host whitelist for counting (comma-separated), empty = no restriction
       BSZ_ALLOWHOSTS: ""
 ```
@@ -104,7 +109,8 @@ Every setting can be overridden via environment variables (`.` maps to `_`):
 | REDIS_PREFIX | Redis.Prefix | Redis key prefix | bsz |
 | BSZ_EXPIRE | Bsz.Expire | Stats expiry in seconds, 0 = never | 0 |
 | BSZ_SECRET | Bsz.Secret | Identity token signing secret (required, ≥16 chars) | bsz |
-| BSZ_ENCRYPT | Bsz.Encrypt | Key/identity encryption (MD516/MD532/empty) | empty |
+| BSZ_ENCRYPT | Bsz.Encrypt | Key/identity masking in privacy mode (MD516/MD532, empty = full MD5) | empty (full MD5) |
+| BSZ_PRIVACY | Bsz.Privacy | Privacy mode: MD5-masked host/path + identity MD5(IP+UA); false = plaintext host/path + raw IP | true |
 | BSZ_PATHSTYLE | Bsz.PathStyle | Path storage style | true |
 | BSZ_ALLOWHOSTS | Bsz.AllowHosts | Host whitelist for counting (comma-separated, empty = unrestricted) | empty |
 
@@ -130,6 +136,21 @@ Script attributes:
 | data-style | Number format: default / comma / short (K/M/B) | default |
 | pjax | Enable Pjax compatibility (auto refresh on pushState / popstate) | none |
 
+**Front-end script variants** (all bundled in the Docker image):
+
+| Script | Notes |
+|---|---|
+| `/js` (busuanzi.js) | Full version: supports `data-api` / `data-prefix` / `data-style` / `pjax` |
+| `/js/jsonp` (busuanzi.jsonp.js) | JSONP version: `<script>` tag cross-origin, no CORS needed, works in legacy environments |
+| `/js/lite` (busuanzi.lite.js) | Lite version: only `prefix`, no attribute config or number formatting, smallest footprint |
+| `/js/lite_pjax` (busuanzi.pjax.lite.js) | Lite + Pjax auto-refresh |
+
+JSONP usage (`data-api` points to `/jsonp`):
+
+```html
+<script src="https://your-domain.com/js/jsonp" data-api="https://your-domain.com/jsonp"></script>
+```
+
 ## 🔌 API
 
 All endpoints require the `x-bsz-referer: <full page URL>` header; the identity token goes in `Authorization: Bearer <token>` (issued via the `Set-Bsz-Identity` response header on first visit).
@@ -139,9 +160,11 @@ All endpoints require the `x-bsz-referer: <full page URL>` header; the identity 
 | POST | /api | Count and return latest stats |
 | GET | /api | Read-only query, does not count |
 | PUT | /api | Count only, returns 204 |
+| GET | /jsonp?callback=xxx | JSONP counting (`Referer` header auth, returns `try{callback(json)}catch(e){}`) |
 | GET | /ping | Health check (includes Redis connectivity, 503 when down) |
 
 > API returns `429` when the rate limit (`WEB_RATELIMIT`) is exceeded.
+> `/jsonp` needs no `Authorization` header: identity is computed server-side per privacy mode (default `MD5(IP+UA)`).
 
 Example response:
 
@@ -155,7 +178,7 @@ Example response:
 
 ## 🗄️ Data Storage Structure
 
-Data is stored in Redis as follows (key prefix defaults to `bsz`; host/path are MD5-masked when `BSZ_ENCRYPT=MD516/MD532` is enabled):
+Data is stored in Redis as follows (key prefix defaults to `bsz`):
 
 | Metric | Type | Key |
 |---|---|---|
@@ -164,10 +187,15 @@ Data is stored in Redis as follows (key prefix defaults to `bsz`; host/path are 
 | pagePv | ZSet | bsz:page_pv:{host} (member=path) |
 | pageUv | Set | bsz:page_uv:{host}:{path} |
 
+> **Privacy mode is on by default** (`BSZ_PRIVACY=true`, same as upstream): `{host}` / `{path}` above are MD5-masked
+> (`BSZ_ENCRYPT=MD516` keeps 16 middle chars, `MD532` or empty keeps the full MD5), so Redis keys don't leak site paths;
+> set `BSZ_PRIVACY=false` for plaintext host/path (handy for debugging and migration).
+
 ## 🛡️ Security Tips
 
 - `BSZ_SECRET` must be a random strong secret (the service refuses to start otherwise)
-- Enable `BSZ_ENCRYPT=MD532` to avoid leaking site paths and visitor info in Redis keys
+- **Keep `BSZ_PRIVACY=true` (default)**: Redis keys don't leak site paths or visitor IPs
+- Optionally use `BSZ_ENCRYPT=MD516` (shorter keys, slightly weaker masking) or `MD532`
 - Set `BSZ_ALLOWHOSTS` to block forged referers from inflating arbitrary sites
 - Keep `WEB_RATELIMIT` on to prevent abuse from a single IP
 - Password-protect Redis and restrict which hosts can reach it
@@ -190,6 +218,7 @@ go test ./...    # unit tests
 
 - Always back up your data (Redis dump.rdb) before upgrading
 - New versions may not be data-compatible; check the Release notes
+- **Since v2.2.0 privacy mode is on by default**: if you upgrade from an older build that used plaintext keys, set `BSZ_PRIVACY=false` to keep reading existing data, or accept a fresh count
 - 2.5.x - 2.7.x users can migrate with [bsz-transfer](https://github.com/soxft/busuanzi-transfer)
 
 ## 📄 License

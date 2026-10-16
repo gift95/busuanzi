@@ -11,7 +11,7 @@ import (
 var (
 	configPath string
 	DistPath   string
-	VERSION    = "2.1.1"
+	VERSION    = "2.2.0"
 )
 
 func Init() {

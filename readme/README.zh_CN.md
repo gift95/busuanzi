@@ -7,7 +7,8 @@
 - 统计站点的 UV, PV
 - 统计子页面的 UV, PV
 - 使用 Docker 一键部署
-- 隐私保障 仅存储 HASH（可选）
+- 隐私模式默认开启：仅存储 MD5 混淆的 host/path 与 MD5(IP+UA) 身份（`BSZ_PRIVACY=false` 可切换明文）
+- JSONP 计数端点与多前端变体（完整版 / JSONP / Lite / Lite+Pjax）
 - 兼容 Pjax 技术的网页
 - 支持从原版不蒜子迁移数据
 
@@ -41,6 +42,8 @@ docker build -t gift95/busuanzi:latest .
 | siteUv | Set      | bsz:site_uv:{host}              |
 | pagePv | ZSet     | bsz:page_pv:{host}（member=path）|
 | pageUv | Set      | bsz:page_uv:{host}:{path}       |
+
+> 隐私模式默认开启：上表 `{host}` / `{path}` 会做 MD5 混淆（`BSZ_ENCRYPT=MD516` 取中段 16 位，`MD532` 或空取完整 MD5）；`BSZ_PRIVACY=false` 则明文存储。
 
 ## 数据迁移
 

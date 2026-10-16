@@ -16,6 +16,8 @@ func initRoute(r *gin.Engine) {
 		api.PUT("", controller.PutHandler)
 	}
 
+	// JSONP 计数端点（script 标签跨域，无需 CORS/Authorization）
+	r.GET("/jsonp", middleware.RateLimit(), controller.JsonpHandler)
 	r.GET("/ping", controller.PingHandler)
 
 	static := r.Group("/")
@@ -23,6 +25,9 @@ func initRoute(r *gin.Engine) {
 		static.Use(middleware.Cache())
 		static.GET("/", controller.Index)
 		static.StaticFile("/js", config.DistPath+"/busuanzi.js")
+		static.StaticFile("/js/jsonp", config.DistPath+"/busuanzi.jsonp.js")
+		static.StaticFile("/js/lite", config.DistPath+"/busuanzi.lite.js")
+		static.StaticFile("/js/lite_pjax", config.DistPath+"/busuanzi.pjax.lite.js")
 	}
 	r.NoRoute(middleware.Cache(), controller.Index)
 }
