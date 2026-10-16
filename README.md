@@ -1,5 +1,7 @@
 <div align="center">
 
+[English](README.en.md) | **中文**
+
 # 自建不蒜子 (busuanzi)
 
 > 一个基于 **Golang + Redis** 的轻量访问量统计系统

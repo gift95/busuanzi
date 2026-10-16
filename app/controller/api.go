@@ -13,7 +13,7 @@ import (
 
 var defaultData = gin.H{
 	"project": "https://github.com/gift95/busuanzi",
-	"usage":   "https://github.com/gift95/busuanzi#readme",
+	"usage":   "https://github.com/gift95/busuanzi",
 }
 
 // parseReferer 校验并解析 x-bsz-referer，返回 host 与 path。
