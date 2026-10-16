@@ -10,7 +10,7 @@ import (
 func initRoute(r *gin.Engine) {
 	api := r.Group("/api")
 	{
-		api.Use(middleware.Identity())
+		api.Use(middleware.RateLimit(), middleware.Identity())
 		api.POST("", controller.ApiHandler)
 		api.GET("", controller.GetHandler)
 		api.PUT("", controller.PutHandler)

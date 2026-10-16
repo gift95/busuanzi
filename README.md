@@ -87,6 +87,8 @@ go build -o busuanzi main.go
 | WEB_CORS | Web.Cors | 跨域白名单：`*` 或逗号分隔域名 | * |
 | WEB_DEBUG | Web.Debug | debug 模式 | false |
 | WEB_LOG | Web.Log | 访问日志 | false |
+| WEB_RATELIMIT | Web.RateLimit | 每 IP 每秒请求数（令牌桶，0 关闭） | 10 |
+| WEB_RATELIMITBURST | Web.RateLimitBurst | 令牌桶容量（突发上限） | 20 |
 | REDIS_ADDRESS | Redis.Address | Redis 地址 | redis:6379 |
 | REDIS_PASSWORD | Redis.Password | Redis 密码 | 空 |
 | REDIS_DATABASE | Redis.Database | Redis 库号 | 0 |
@@ -96,6 +98,7 @@ go build -o busuanzi main.go
 | BSZ_SECRET | Bsz.Secret | 身份令牌签名密钥（必填，≥16 位） | bsz |
 | BSZ_ENCRYPT | Bsz.Encrypt | key/身份加密算法（MD516/MD532/空） | 空 |
 | BSZ_PATHSTYLE | Bsz.PathStyle | 路径存储样式 | true |
+| BSZ_ALLOWHOSTS | Bsz.AllowHosts | 允许统计的域名白名单（逗号分隔，空则不限制） | 空 |
 
 ## 📖 前端接入
 
@@ -128,7 +131,9 @@ go build -o busuanzi main.go
 | POST | /api | 计数并返回最新统计 |
 | GET | /api | 只读查询，不计数 |
 | PUT | /api | 只计数，返回 204 |
-| GET | /ping | 健康检查 |
+| GET | /ping | 健康检查（含 Redis 连通性，异常返回 503） |
+
+> 超过限流阈值（`WEB_RATELIMIT`）时 API 返回 `429`。
 
 响应示例：
 
@@ -155,6 +160,8 @@ Redis 按以下结构存储（key 前缀默认 `bsz`；开启 `BSZ_ENCRYPT=MD516
 
 - `BSZ_SECRET` 必须设置为随机强密钥（否则服务拒绝启动）
 - 建议开启 `BSZ_ENCRYPT=MD532`，避免 Redis key 泄露站点路径与访问者信息
+- 设置 `BSZ_ALLOWHOSTS` 域名白名单，拒绝伪造 referer 刷任意站点数据
+- 保持 `WEB_RATELIMIT` 开启，限制单 IP 请求频率防止刷量
 - 为 Redis 设置密码，并限制可访问来源
 - 仅暴露 API 端口，通过反向代理（Nginx / Caddy）提供 HTTPS
 

@@ -3,10 +3,12 @@ package controller
 import (
 	"context"
 	"net/url"
+	"strings"
 
 	"busuanzi/core"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 var defaultData = gin.H{
@@ -14,7 +16,8 @@ var defaultData = gin.H{
 	"usage":   "https://github.com/soxft/busuanzi/wiki/usage",
 }
 
-// parseReferer 校验并解析 x-bsz-referer，返回 host 与 path
+// parseReferer 校验并解析 x-bsz-referer，返回 host 与 path。
+// 配置 Bsz.AllowHosts（逗号分隔）后，仅白名单内的 host 允许计数。
 func parseReferer(c *gin.Context) (host, path string, ok bool) {
 	referer := c.Request.Header.Get("x-bsz-referer")
 	if referer == "" {
@@ -23,6 +26,18 @@ func parseReferer(c *gin.Context) (host, path string, ok bool) {
 	u, err := url.Parse(referer)
 	if err != nil || u.Host == "" {
 		return "", "", false
+	}
+	if hosts := viper.GetString("bsz.allowHosts"); hosts != "" {
+		allowed := false
+		for _, h := range strings.Split(hosts, ",") {
+			if strings.EqualFold(strings.TrimSpace(h), u.Host) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return "", "", false
+		}
 	}
 	return u.Host, u.Path, true
 }
